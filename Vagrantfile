@@ -47,10 +47,10 @@ Vagrant.configure("2") do |config|
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "debian/bookworm64"
 
-  # config.vm.provider "virtualbox" do |v|
-  #   v.memory = 1024
-  #   v.cpus = 1
-  # end
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 1024
+    v.cpus = 1
+  end
 
   config.vm.define "gd-harcoS" do |server|
     server.vm.hostname = "gd-harcoS"
