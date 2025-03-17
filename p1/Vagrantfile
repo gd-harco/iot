@@ -52,13 +52,24 @@ Vagrant.configure("2") do |config|
     v.cpus = 1
   end
 
+# Common provisionning
+
+  config.vm.provision "shell", name: "apt-basics", inline: <<-SCRIPT
+    sudo apt-get update
+    sudo apt-get install curl -y
+    SCRIPT
+
   config.vm.define "gd-harcoS" do |server|
     server.vm.hostname = "gd-harcoS"
     server.vm.network "private_network", ip: SERVICES['gd-harcoS'][:ip]
     server.vm.provider "virtualbox" do |v|
       v.name = "gd-harcoS"
     end
+    server.vm.provision "shell", name: "install-k3s-Server", path:"./provisioning/ServerProvision.sh"
   end
+
+  # le token s;affiche dans /var/lib/rancher/k3s/server/token. le recuper et l'exporter dans l'env du worker
+
 
   config.vm.define "gd-harcoSW" do |worker|
     worker.vm.hostname = "gd-harcoSW"
@@ -66,6 +77,9 @@ Vagrant.configure("2") do |config|
     worker.vm.provider "virtualbox" do |v|
       v.name = "gd-harcoSW"
     end
+    worker.vm.provision "shell", name: "install-k3s-Worker", path:"./provisioning/WorkerProvision.sh"
   end
 
 end
+
+# https://www.youtube.com/watch?v=JLnjMCRLcCo
