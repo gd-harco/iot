@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prowlarr
+spec:
+  selector:
+    prowlarr:
+      app: helloworld
+  replicas: 1 # tells deployment to run 1 pods matching the template
+  template: # create pods using pod definition in this template
+    metadata:
+      labels:
+        app: prowlarr
+    spec:
+      containers:
+      - name: helloworld
+        image: lscr.io/linuxserver/prowlarr:latest
+        ports:
+        - containerPort: 9696

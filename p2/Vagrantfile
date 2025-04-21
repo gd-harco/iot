@@ -1,0 +1,43 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+=begin
+
+=end
+
+
+SERVICES = {
+  'gd-harcoS' => {
+    ip: '192.168.56.110',
+    # ports: { 6379 => 6379 }
+  }
+}
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "debian/bookworm64"
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 1024
+    v.cpus = 1
+  end
+
+# Common provisionning
+
+  config.vm.provision "shell", name: "apt-basics", inline: <<-SCRIPT
+    sudo apt-get update
+    sudo apt-get install curl -y
+    SCRIPT
+
+  config.vm.define "gd-harcoS" do |server|
+    server.vm.hostname = "gd-harcoS"
+    server.vm.network "private_network", ip: SERVICES['gd-harcoS'][:ip]
+    server.vm.provider "virtualbox" do |v|
+      v.name = "gd-harcoS"
+    end
+    server.vm.provision "shell", name: "install-k3s-Server", path:"./provisioning/ServerProvision.sh"
+  end
+
+end
+
+# https://www.youtube.com/watch?v=JLnjMCRLcCo
