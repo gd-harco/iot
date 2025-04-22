@@ -7,7 +7,7 @@
 
 
 SERVICES = {
-  'gd-harcoS' => {
+  'marobertS' => {
     ip: '192.168.56.110',
     # ports: { 6379 => 6379 }
   }
@@ -29,14 +29,18 @@ Vagrant.configure("2") do |config|
     sudo apt-get install curl -y
     SCRIPT
 
-  config.vm.define "gd-harcoS" do |server|
-    server.vm.hostname = "gd-harcoS"
-    server.vm.network "private_network", ip: SERVICES['gd-harcoS'][:ip]
+  config.vm.define "marobertS" do |server|
+    server.vm.hostname = "marobertS"
+    server.vm.network "private_network", ip: SERVICES['marobertS'][:ip]
     server.vm.provider "virtualbox" do |v|
-      v.name = "gd-harcoS"
+      v.name = "marobertS"
     end
     server.vm.provision "shell", name: "install-k3s-Server", path:"./provisioning/ServerProvision.sh"
   end
+
+  config.vm.provision "shell", name: "no-sudo-kubectl", inline: <<-SCRIPT
+    sudo chmod 644 /etc/rancher/k3s/k3s.yaml
+    SCRIPT
 
 end
 
