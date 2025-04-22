@@ -1,0 +1,40 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/bookworm64"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.gui = false
+    vb.cpus = 1
+    vb.memory = "1024"
+  end
+
+  config.vm.define "marobert" do |server|
+    server.vm.hostname = "marobertS"
+    server.vm.network "private_network", ip: "192.168.56.110"
+
+    server.vm.provision "shell", name: "install-k3s-server", privileged: false, inline: <<-SHELL
+      wget -qO - https://get.k3s.io | sh -
+      if [ $? -ne 0 ]; then
+        echo "Failed to install k3s server $?"
+        exit 1;
+      fi
+      sudo cp /var/lib/rancher/k3s/server/node-token /vagrant/node-token
+    SHELL
+
+  end
+
+  config.vm.define "jrenault" do |agent|
+    agent.vm.hostname = "marobertSW"
+    agent.vm.network "private_network", ip: "192.168.56.111"
+
+    agent.vm.provision "shell", name: "install-k3s-node", privileged: false, inline: <<-SHELL
+      while [ ! -f /vagrant/node-token ]; do
+        sleep 2
+      done
+
+      wget -qO - https://get.k3s.io | K3S_TOKEN=`cat /vagrant/node-token` K3S_URL='https://192.168.56.110:6443' sh - 
+    SHELL
+  end
+end
