@@ -1,3 +1,0 @@
-# service-node-port-range: "80-32767"
-# node-external-ip: "192.168.56.110" # Replace with your eth1 IP address
-flannel-iface: eth1
