@@ -1,15 +1,24 @@
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: app3-pod
   namespace: inception-of-things
   labels:
     app: app3
 spec:
-  containers:
-    - name: tetris
-      image: uzyexe/tetris:latest
-      ports:
+  selector:
+    matchLabels:
+      app: helloworld
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: helloworld
+    spec:
+      containers:
+      - name: tetris
+        image: uzyexe/tetris:latest
+        ports:
         - containerPort: 80
 
 ---
