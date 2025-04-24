@@ -8,6 +8,7 @@
 
 SERVICES = {
   'marobertS' => {
+
     ip: '192.168.56.110',
     # ports: { 6379 => 6379 }
   }
@@ -18,8 +19,8 @@ Vagrant.configure("2") do |config|
   config.vm.box = "debian/bookworm64"
 
   config.vm.provider "virtualbox" do |v|
-    v.memory = 1024
-    v.cpus = 1
+    v.memory = 2048
+    v.cpus = 4
   end
 
 # Common provisionning
@@ -36,12 +37,15 @@ Vagrant.configure("2") do |config|
       v.name = "marobertS"
     end
     server.vm.provision "shell", name: "install-k3s-Server", path:"./provisioning/ServerProvision.sh"
+    server.vm.provision "shell", name: "ease-access", path:"./provisioning/access.sh"
+    server.vm.provision "shell", name: "config-traeffik", inline: <<-SCRIPT
+      sudo cp /vagrant/config/config.yaml /etc/rancher/k3s/config.yaml
+      SCRIPT
+    # server.vm.provision "shell", name: "launch", inline: <<-EOF
+    #   cd /vagrant/deployement/
+    #   sudo kubectl apply -f .
+    #   EOF
   end
-
-  config.vm.provision "shell", name: "no-sudo-kubectl", inline: <<-SCRIPT
-    sudo chmod 644 /etc/rancher/k3s/k3s.yaml
-    SCRIPT
-
 end
 
 # https://www.youtube.com/watch?v=JLnjMCRLcCo
