@@ -36,7 +36,7 @@ Vagrant.configure("2") do |config|
     server.vm.provider "virtualbox" do |v|
       v.name = "marobertS"
     end
-    server.vm.provision "shell", name: "install-k3s-Server", path:"./provisioning/ServerProvision.sh", args: ['192.168.56.110']
+    server.vm.provision "shell", name: "install-k3s-Server", path:"./provisioning/ServerProvision.sh", args: [SERVICES['marobertS'][:ip]]
     server.vm.provision "shell", name: "ease-access", path:"./provisioning/access.sh"
     # server.vm.provision "shell", name: "config-traeffik", inline: <<-SCRIPT
     #   sudo cp /vagrant/config/config.yaml /etc/rancher/k3s/config.yaml
