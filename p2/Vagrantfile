@@ -1,0 +1,34 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/bookworm64"
+
+  # accessing "localhost:8080" will access port 80 on the guest machine.
+  # NOTE: This will enable public access to the opened port
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network "public_network"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.gui = false
+    vb.cpus = 2
+
+    vb.memory = 4096 
+  end
+
+  config.vm.define "marobertS" do |server|
+    server.vm.hostname = "marobertS"
+    server.vm.network "private_network", ip: "192.168.56.110"
+
+    server.vm.provision "shell", name: "install-k3s-server", privileged: false, inline: <<-SHELL
+      wget -qO - https://get.k3s.io | sh -
+      if [ $? -ne 0 ]; then
+        echo "Failed to install k3s server $?"
+        exit 1;
+      fi
+      #sudo cp /var/lib/rancher/k3s/server/node-token /vagrant/node-token
+    SHELL
+
+  end
+end
