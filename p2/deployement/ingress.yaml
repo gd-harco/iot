@@ -1,4 +1,3 @@
----
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -35,3 +34,12 @@ spec:
                 name: app3-service
                 port:
                   number: 80
+    - http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: app3-service
+              port:
+                number: 80
