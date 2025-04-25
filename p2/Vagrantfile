@@ -21,13 +21,23 @@ Vagrant.configure("2") do |config|
     server.vm.hostname = "marobertS"
     server.vm.network "private_network", ip: "192.168.56.110"
 
-    server.vm.provision "shell", name: "install-k3s-server", privileged: false, inline: <<-SHELL
-      wget -qO - https://get.k3s.io | sh -
+    server.vm.provision "install-k3s-server", type: "shell", inline: <<-SHELL
+      export INSTALL_K3S_EXEC="server --node-external-ip=192.168.56.110 --bind-address=192.168.56.110 flannel-iface=eth1 --write-kubeconfig-mode=644 --disable traefik"
+      wget -qO- https://get.k3s.io | sh -
       if [ $? -ne 0 ]; then
         echo "Failed to install k3s server $?"
         exit 1;
       fi
-      #sudo cp /var/lib/rancher/k3s/server/node-token /vagrant/node-token
+    SHELL
+
+    server.vm.provision "k3s-apply-manifests", type: "shell", after: "install-k3s-server", privileged: false, inline: <<-SHELL 
+      cd /vagrant
+      kubectl apply -f namespace.yml
+      kubectl apply -f app1.yml
+      kubectl apply -f app2.yml
+      kubectl apply -f app3.yml
+      kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.12.1/deploy/static/provider/baremetal/deploy.yaml
+      kubectl apply -f ingress.yml
     SHELL
 
   end
