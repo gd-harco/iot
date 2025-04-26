@@ -29,6 +29,8 @@ exec_install() {
 		curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 		chmod +x kubectl
 		sudo mv kubectl /usr/local/bin/
+		echo "alias k=kubectl" >> "$HOME/.zshrc"
+
 	fi
 
 }
@@ -41,6 +43,7 @@ uninstall() {
 		echo "kubectl not installed"
 	else
 		sudo rm "$(which kubectl)"
+		sed '/alias\ k=kubectl/d' "$HOME/.zshrc" > .zshrc.tmp && mv .zshrc.tmp "$HOME/.zshrc"
 	fi
 
 	#### K3D ####
