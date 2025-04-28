@@ -32,11 +32,11 @@ Vagrant.configure("2") do |config|
 
     server.vm.provision "k3s-apply-manifests", type: "shell", after: "install-k3s-server", privileged: false, inline: <<-SHELL 
       cd /vagrant
-      kubectl apply -f namespace.yml
-      kubectl apply -f app1.yml
-      kubectl apply -f app2.yml
-      kubectl apply -f app3.yml
-      kubectl apply -f ingress.yml
+      kubectl apply -f confs/namespace.yml
+      kubectl apply -f confs/app1.yml
+      kubectl apply -f confs/app2.yml
+      kubectl apply -f confs/app3.yml
+      kubectl apply -f confs/ingress.yml
     SHELL
 
   end
