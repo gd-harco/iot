@@ -4,7 +4,7 @@ metadata:
   name: iot-ingress
   namespace: inception-of-things
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    traefik.ingress.kubernetes.io/router.tls: "false"
 spec:
   rules:
   - host: app1.com

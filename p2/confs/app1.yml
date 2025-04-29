@@ -3,8 +3,6 @@ kind: Deployment
 metadata:
   name: app1-pod
   namespace: inception-of-things
-  labels:
-    app: app1
 spec:
   selector:
     matchLabels:
@@ -32,8 +30,6 @@ spec:
   selector:
     app: app1
   ports:
-    - protocol: TCP
-      port: 80
+    - port: 80
       targetPort: 8080
-      
   type: ClusterIP

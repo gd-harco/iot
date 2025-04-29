@@ -3,8 +3,6 @@ kind: Deployment
 metadata:
   name: app2-pod
   namespace: inception-of-things
-  labels:
-    app: app2
 spec:
   selector:
     matchLabels:
@@ -33,6 +31,5 @@ spec:
   selector:
     app: helloworld
   ports:
-    - protocol: TCP
-      port: 80
+    - port: 80
       targetPort: 80

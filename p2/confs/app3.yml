@@ -3,8 +3,6 @@ kind: Deployment
 metadata:
   name: app3-pod
   namespace: inception-of-things
-  labels:
-    app: app3
 spec:
   selector:
     matchLabels:
@@ -33,7 +31,6 @@ spec:
   selector:
     app: app3
   ports:
-    - protocol: TCP
-      port: 80
+    - port: 80
       targetPort: 80
 

@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
     server.vm.network "private_network", ip: "192.168.56.110"
 
     server.vm.provision "install-k3s-server", type: "shell", inline: <<-SHELL
-      export INSTALL_K3S_EXEC="server --node-external-ip=192.168.56.110 --bind-address=192.168.56.110 flannel-iface=eth1 --write-kubeconfig-mode=644 "
+      export INSTALL_K3S_EXEC="server --write-kubeconfig-mode=644"
       wget -qO- https://get.k3s.io | sh -
       if [ $? -ne 0 ]; then
         echo "Failed to install k3s server $?"
@@ -32,11 +32,11 @@ Vagrant.configure("2") do |config|
 
     server.vm.provision "k3s-apply-manifests", type: "shell", after: "install-k3s-server", privileged: false, inline: <<-SHELL 
       cd /vagrant
-      kubectl apply -f confs/namespace.yml
-      kubectl apply -f confs/app1.yml
-      kubectl apply -f confs/app2.yml
-      kubectl apply -f confs/app3.yml
-      kubectl apply -f confs/ingress.yml
+      kubectl apply -f namespace.yml
+      kubectl apply -f app1.yml
+      kubectl apply -f app2.yml
+      kubectl apply -f app3.yml
+      kubectl apply -f ingress.yml
     SHELL
 
   end
