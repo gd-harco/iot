@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 # Define color codes for different information levels
 export INFO='\033[0;32m'    # Green for standard information
 export WARN='\033[0;33m'    # Yellow for warnings
@@ -39,7 +39,10 @@ export MAIN_SCRIPT_RUNNING=true
 # Check command line arguments
 if [ "$1" = "install" ]; then
 	print_section "STARTING INSTALLATION PROCESS"
-	bash -c ./script/install.sh
+	if ! bash -c ./script/install.sh; then
+		print_error "Installation failed. Please check the logs."
+		exit 1
+	fi
 elif [ "$1" = "uninstall" ]; then
 	print_section "STARTING UNINSTALLATION PROCESS"
 	bash -c ./script/uninstall.sh
@@ -48,4 +51,30 @@ else
 	print_error "Please specify 'install' or 'uninstall'"
 	exit 1
 fi
+
+# Cluster creation
+print_section "CLUSTER SETUP"
+print_info "Creating k3d cluster 'iotp3'..."
+k3d cluster create iotp3 --api-port 6550 -p "8081:80@loadbalancer"
+print_success "Cluster created successfully"
+
+# ArgoCD installation
+print_section "ARGOCD SETUP"
+print_info "Creating namespace 'argocd'..."
+kubectl create namespace argocd
+
+print_info "Applying ArgoCD installation manifests..."
+kubectl apply -n argocd -f ./argocd/install.yaml
+
+print_info "Applying ArgoCD configuration..."
+kubectl apply -n argocd -f ./argocd/argocd-cmd-params-cm.yaml
+
+print_info "Restarting ArgoCD server for changes to take effect..."
+kubectl rollout restart deployment argocd-server -n argocd
+
+print_info "Setting up ingress for ArgoCD..."
+kubectl apply -f ./argocd/ingress.yaml -n argocd
+
+print_success "Installation complete!"
+print_info "ArgoCD should now be available at http://localhost:8081"
 exit 0

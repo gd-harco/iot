@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 # Check if this script is being run from the main script
 if [ -z "$MAIN_SCRIPT_RUNNING" ]; then
   echo -e "\033[0;31m[ERROR]\033[0m This script should only be run through the main deployment script."
@@ -50,7 +50,7 @@ else
   sudo mv kubectl /usr/local/bin/
 
   print_info "Adding kubectl alias to .zshrc..."
-  echo "alias k=kubectl" >> "$HOME/.zshrc"
+  echo "alias k=kubectl" >>"$HOME/.zshrc"
 
   print_success "kubectl installation complete"
 fi

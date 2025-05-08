@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 # Check if this script is being run from the main script
 if [ -z "$MAIN_SCRIPT_RUNNING" ]; then
   echo -e "\033[0;31m[ERROR]\033[0m This script should only be run through the main deployment script."
@@ -20,7 +20,7 @@ else
   sudo rm "$(which kubectl)"
 
   print_info "Removing kubectl alias from .zshrc..."
-  sed '/alias\ k=kubectl/d' "$HOME/.zshrc" > .zshrc.tmp && mv .zshrc.tmp "$HOME/.zshrc"
+  sed '/alias\ k=kubectl/d' "$HOME/.zshrc" >.zshrc.tmp && mv .zshrc.tmp "$HOME/.zshrc"
 
   print_success "kubectl successfully removed"
 fi
