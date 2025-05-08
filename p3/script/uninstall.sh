@@ -1,34 +1,62 @@
 #!/bin/bash
 
-echo "uninstall mode called"
+# Check if this script is being run from the main script
+if [ -z "$MAIN_SCRIPT_RUNNING" ]; then
+  echo -e "\033[0;31m[ERROR]\033[0m This script should only be run through the main deployment script."
+  echo -e "\033[0;33m[INFO]\033[0m Please run: ./main_script.sh uninstall"
+  exit 1
+fi
 
-#### Kubectl ####
+# Functions and colors are inherited from the main script
+
+print_section "UNINSTALL MODE INITIATED"
+
+#### KUBECTL REMOVAL ####
+print_section "KUBECTL REMOVAL"
 if ! command -v kubectl &>/dev/null; then
-	echo "kubectl not installed"
+  print_warn "kubectl not found - skipping removal"
 else
-	echo "prout"
-	sudo rm "$(which kubectl)"
-	sed '/alias\ k=kubectl/d' "$HOME/.zshrc" >.zshrc.tmp && mv .zshrc.tmp "$HOME/.zshrc"
+  print_info "Removing kubectl..."
+  sudo rm "$(which kubectl)"
+
+  print_info "Removing kubectl alias from .zshrc..."
+  sed '/alias\ k=kubectl/d' "$HOME/.zshrc" > .zshrc.tmp && mv .zshrc.tmp "$HOME/.zshrc"
+
+  print_success "kubectl successfully removed"
 fi
 
-#### K3D ####
+#### K3D REMOVAL ####
+print_section "K3D REMOVAL"
 if ! command -v k3d &>/dev/null; then
-	echo "k3d not installed"
+  print_warn "k3d not found - skipping removal"
 else
-	k3d cluster delete -a
-	sudo rm "$(which k3d)"
+  print_info "Deleting all k3d clusters..."
+  k3d cluster delete -a
+
+  print_info "Removing k3d..."
+  sudo rm "$(which k3d)"
+
+  print_success "k3d successfully removed"
 fi
 
-#### Docker Removal ####
+#### DOCKER REMOVAL ####
+print_section "DOCKER REMOVAL"
 if ! command -v docker &>/dev/null; then
-	echo "Docker is not installed, skipping"
+  print_warn "Docker not found - skipping removal"
 else
-	sudo apt-get purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras -y
-	sudo rm -rf /var/lib/docker
-	sudo rm -rf /var/lib/containerd
-	sudo rm /etc/apt/sources.list.d/docker.list
-	sudo rm /etc/apt/keyrings/docker.asc
-	sudo groupdel docker
+  print_info "Removing Docker packages..."
+  sudo apt-get purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras -y
 
-	echo "Docker uninstalled"
+  print_info "Cleaning Docker directories and files..."
+  sudo rm -rf /var/lib/docker
+  sudo rm -rf /var/lib/containerd
+  sudo rm -f /etc/apt/sources.list.d/docker.list
+  sudo rm -f /etc/apt/keyrings/docker.asc
+
+  print_info "Removing Docker group..."
+  sudo groupdel docker
+
+  print_success "Docker successfully removed"
 fi
+
+print_success "Uninstallation process completed successfully"
