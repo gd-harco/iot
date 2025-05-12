@@ -8,7 +8,8 @@ metadata:
   namespace: argocd
 spec:
   rules:
-    - http:
+    - host: config.iot.ft
+      http:
         paths:
           - path: /
             pathType: Prefix
