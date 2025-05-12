@@ -58,8 +58,13 @@ setup() {
 	kubectl apply -f ./argocd/ingress.yaml -n argocd
 
 	print_success "Installation complete!"
+	print_info "Waiting for ArgoCD to be ready..."
+	kubectl wait --for=condition=Available deploy/argocd-server -n argocd
+
 	print_info "ArgoCD should now be available at http://localhost:8081"
-	exit 0
+
+	kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d | cat >./argocd/password.txt
+	print_success "Initial admin password saved to ./argocd/password.txt"
 
 }
 
@@ -83,6 +88,6 @@ elif [ "$1" = "setup" ]; then
 	setup
 	exit 0
 else
-	print_error "Please specify 'install' or 'uninstall'"
+	print_error "Please specify 'install', 'uninstall' or 'setup'"
 	exit 1
 fi
