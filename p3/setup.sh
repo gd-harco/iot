@@ -61,11 +61,18 @@ setup() {
 	print_info "Waiting for ArgoCD to be ready..."
 	kubectl wait --for=condition=Available deploy/argocd-server -n argocd
 
+	print_info "Updating /etc/hosts file..."
+	if ! grep -q "127.0.0.1 config.iot.ft" /etc/hosts; then
+		echo "Adding entry to /etc/hosts"
+		echo "127.0.0.1 config.iot.ft" | sudo tee -a /etc/hosts
+	else :
+		print_info "Entry already exists in /etc/hosts, skipping..."
+	fi
+
 	print_info "ArgoCD should now be available at http://localhost:8081"
 
 	kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d | cat >./argocd/password.txt
 	print_success "Initial admin password saved to ./argocd/password.txt"
-
 }
 
 # Export a flag to indicate scripts are being run from the main script

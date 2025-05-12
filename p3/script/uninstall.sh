@@ -19,9 +19,6 @@ else
   print_info "Removing kubectl..."
   sudo rm "$(which kubectl)"
 
-  print_info "Removing kubectl alias from .zshrc..."
-  sed '/alias\ k=kubectl/d' "$HOME/.zshrc" >.zshrc.tmp && mv .zshrc.tmp "$HOME/.zshrc"
-
   print_success "kubectl successfully removed"
 fi
 
@@ -58,5 +55,19 @@ else
 
   print_success "Docker successfully removed"
 fi
+
+print_section "CLEANING UP"
+
+print_info "removing alias from .zshrc..."
+sed '/alias\ k=kubectl/d' "$HOME/.zshrc" >.zshrc.tmp && mv .zshrc.tmp "$HOME/.zshrc"
+
+print_info "cleaning up hosts file..."
+if grep -q "127.0.0.1 config.iot.ft" /etc/hosts; then
+  sudo sed -i '/127.0.0.1\ config.iot.ft/d' /etc/hosts
+fi
+if grep -q "127.0.0.1 app.iot.ft" /etc/hosts; then
+  sudo sed -i '/127.0.0.1\ app.iot.ft/d' /etc/hosts
+fi
+print_success "Hosts file cleaned up"
 
 print_success "Uninstallation process completed successfully"
