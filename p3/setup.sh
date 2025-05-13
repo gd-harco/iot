@@ -72,7 +72,7 @@ setup() {
 
 	print_success "Installation complete!"
 	print_info "Waiting for ArgoCD to be ready..."
-	kubectl wait --for=condition=Available deploy/argocd-server -n argocd
+	kubectl wait --for=condition=Available deploy/argocd-server --timeout=120s -n argocd
 
 	update_host "config"
 
