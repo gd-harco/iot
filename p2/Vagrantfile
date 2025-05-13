@@ -36,8 +36,8 @@ Vagrant.configure("2") do |config|
     server.vm.provider "virtualbox" do |v|
       v.name = "marobertS"
     end
-    server.vm.provision "shell", name: "install-k3s-Server", path:"./script/ServerProvision.sh", args: [SERVICES['marobertS'][:ip]]
-    server.vm.provision "shell", name: "ease-access", path:"./script/access.sh"
+    server.vm.provision "shell", name: "install-k3s-Server", path:"./scripts/ServerProvision.sh", args: [SERVICES['marobertS'][:ip]]
+    server.vm.provision "shell", name: "ease-access", path:"./scripts/access.sh"
     server.vm.provision "shell", name: "launch", inline: <<-EOF
       cd /vagrant/confs/
       sudo kubectl apply -f .
