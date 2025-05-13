@@ -45,6 +45,8 @@ update_host() {
 }
 
 setup() {
+	print_section "STARTING SETUP PROCESS"
+
 	# Cluster creation
 	print_section "CLUSTER SETUP"
 	print_info "Creating k3d cluster 'iotp3'..."
@@ -118,23 +120,49 @@ deploy() {
 # Export a flag to indicate scripts are being run from the main script
 export MAIN_SCRIPT_RUNNING=true
 
-# Check command line arguments
-if [ "$1" = "install" ]; then
+case $1 in
+uninstall)
+	print_section "STARTING UNINSTALLATION PROCESS"
+	bash -c ./script/uninstall.sh
+	exit 0
+	;;
+install)
 	print_section "STARTING INSTALLATION PROCESS"
 	if ! bash -c ./script/install.sh; then
 		print_error "Installation failed. Please check the logs."
 		exit 1
 	fi
+	;&
+setup)
 	setup
-elif [ "$1" = "uninstall" ]; then
-	print_section "STARTING UNINSTALLATION PROCESS"
-	bash -c ./script/uninstall.sh
+	;&
+deploy)
+	deploy
 	exit 0
-elif [ "$1" = "setup" ]; then
-	print_section "STARTING SETUP PROCESS"
-	setup
-	exit 0
-else
-	print_error "Please specify 'install', 'uninstall' or 'setup'"
+	;;
+*)
+	print_error "Please specify 'install', 'uninstall', 'setup' or 'deploy'"
 	exit 1
-fi
+	;;
+esac
+
+# # Check command line arguments
+# if [ "$1" = "install" ]; then
+# 	print_section "STARTING INSTALLATION PROCESS"
+# 	if ! bash -c ./script/install.sh; then
+# 		print_error "Installation failed. Please check the logs."
+# 		exit 1
+# 	fi
+# 	setup
+# elif [ "$1" = "uninstall" ]; then
+# 	print_section "STARTING UNINSTALLATION PROCESS"
+# 	bash -c ./script/uninstall.sh
+# 	exit 0
+# elif [ "$1" = "setup" ]; then
+# 	print_section "STARTING SETUP PROCESS"
+# 	setup
+# 	exit 0
+# else
+# 	print_error "Please specify 'install', 'uninstall' or 'setup'"
+# 	exit 1
+# fi
