@@ -70,4 +70,7 @@ if grep -q "127.0.0.1 app.iot.ft" /etc/hosts; then
 fi
 print_success "Hosts file cleaned up"
 
+print_info "removing old password file"
+rm ./argocd/password.txt
+
 print_success "Uninstallation process completed successfully"
