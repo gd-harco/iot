@@ -75,6 +75,41 @@ setup() {
 	print_success "Initial admin password saved to ./argocd/password.txt"
 }
 
+deploy() {
+	print_section "DEPLOYING APPLICATIONS"
+
+	print_info "checkin for submodules..."
+	if [ -z "$(ls -A './app')" ]; then
+		print_info "Submodule not initialize, initializing"
+
+		git submodule init
+		git submodule update
+	else
+		print_warn "Submodule already initialized"
+	fi
+
+	print_info "Creating kubernetes secret"
+	kubectl apply -f app/ssh.yaml
+
+	print_info "Sending application to ArgoCD"
+	kubectl apply -f app/application.yaml
+
+	print_info "Waiting for namespace to be created by ArgoCD"
+	while ! kubectl get namespace application >/dev/null 2>&1; do
+		sleep 1
+	done
+
+	print_info "Waiting for deployment to be created by ArgoCD"
+	while ! kubectl get deployment app-deployment -n application >/dev/null 2>&1; do
+		sleep 1
+	done
+	kubectl wait --for=condition=Available deployment/app-deployment -n application
+
+	update_host "app"
+	print_success "App deployed successfuly, available at http://app.iot.ft:8081"
+
+}
+
 # Export a flag to indicate scripts are being run from the main script
 export MAIN_SCRIPT_RUNNING=true
 
