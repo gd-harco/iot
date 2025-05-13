@@ -50,7 +50,7 @@ setup() {
 	# Cluster creation
 	print_section "CLUSTER SETUP"
 	print_info "Creating k3d cluster 'iotp3'..."
-	k3d cluster create -c ./k3d/cluster_config.yaml
+	k3d cluster create -c ../confs/k3d/cluster_config.yaml
 	print_success "Cluster created successfully"
 
 	# ArgoCD installation
@@ -59,16 +59,16 @@ setup() {
 	kubectl create namespace argocd
 
 	print_info "Applying ArgoCD installation manifests..."
-	kubectl apply -n argocd -f ./argocd/install.yaml
+	kubectl apply -n argocd -f ../confs/argocd/install.yaml
 
 	print_info "Applying ArgoCD configuration..."
-	kubectl apply -n argocd -f ./argocd/argocd-cmd-params-cm.yaml
+	kubectl apply -n argocd -f ../confs/argocd/argocd-cmd-params-cm.yaml
 
 	print_info "Restarting ArgoCD server for changes to take effect..."
 	kubectl rollout restart deployment argocd-server -n argocd
 
 	print_info "Setting up ingress for ArgoCD..."
-	kubectl apply -f ./argocd/ingress.yaml -n argocd
+	kubectl apply -f ../confs/argocd/ingress.yaml -n argocd
 
 	print_success "Installation complete!"
 	print_info "Waiting for ArgoCD to be ready..."
@@ -123,12 +123,12 @@ export MAIN_SCRIPT_RUNNING=true
 case $1 in
 uninstall)
 	print_section "STARTING UNINSTALLATION PROCESS"
-	bash -c ./script/uninstall.sh
+	bash -c ./uninstall.sh
 	exit 0
 	;;
 install)
 	print_section "STARTING INSTALLATION PROCESS"
-	if ! bash -c ./script/install.sh; then
+	if ! bash -c ./install.sh; then
 		print_error "Installation failed. Please check the logs."
 		exit 1
 	fi
@@ -145,24 +145,3 @@ deploy)
 	exit 1
 	;;
 esac
-
-# # Check command line arguments
-# if [ "$1" = "install" ]; then
-# 	print_section "STARTING INSTALLATION PROCESS"
-# 	if ! bash -c ./script/install.sh; then
-# 		print_error "Installation failed. Please check the logs."
-# 		exit 1
-# 	fi
-# 	setup
-# elif [ "$1" = "uninstall" ]; then
-# 	print_section "STARTING UNINSTALLATION PROCESS"
-# 	bash -c ./script/uninstall.sh
-# 	exit 0
-# elif [ "$1" = "setup" ]; then
-# 	print_section "STARTING SETUP PROCESS"
-# 	setup
-# 	exit 0
-# else
-# 	print_error "Please specify 'install', 'uninstall' or 'setup'"
-# 	exit 1
-# fi

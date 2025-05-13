@@ -40,7 +40,7 @@ Vagrant.configure("2") do |config|
     server.vm.provider "virtualbox" do |v|
       v.name = "gd-harcoS"
     end
-    server.vm.provision "shell", name: "install-k3s-Server", path:"./provisioning/ServerProvision.sh"
+    server.vm.provision "shell", name: "install-k3s-Server", path:"./script/ServerProvision.sh"
   end
 
   # le token s;affiche dans /var/lib/rancher/k3s/server/token. le recuper et l'exporter dans l'env du worker
@@ -52,7 +52,7 @@ Vagrant.configure("2") do |config|
     worker.vm.provider "virtualbox" do |v|
       v.name = "gd-harcoSW"
     end
-    worker.vm.provision "shell", name: "install-k3s-Worker", path:"./provisioning/WorkerProvision.sh"
+    worker.vm.provision "shell", name: "install-k3s-Worker", path:"./script/WorkerProvision.sh"
   end
 
 end
