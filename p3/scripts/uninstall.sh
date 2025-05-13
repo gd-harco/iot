@@ -3,7 +3,7 @@ set -e
 # Check if this script is being run from the main script
 if [ -z "$MAIN_SCRIPT_RUNNING" ]; then
   echo -e "\033[0;31m[ERROR]\033[0m This script should only be run through the main deployment script."
-  echo -e "\033[0;33m[INFO]\033[0m Please run: ./main_script.sh uninstall"
+  echo -e "\033[0;33m[INFO]\033[0m Please run: ./scripts/setup.sh uninstall"
   exit 1
 fi
 
@@ -71,6 +71,6 @@ fi
 print_success "Hosts file cleaned up"
 
 print_info "removing old password file"
-rm ./argocd/password.txt
+rm ./password.txt
 
 print_success "Uninstallation process completed successfully"

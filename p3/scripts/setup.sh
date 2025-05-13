@@ -50,7 +50,7 @@ setup() {
 	# Cluster creation
 	print_section "CLUSTER SETUP"
 	print_info "Creating k3d cluster 'iotp3'..."
-	k3d cluster create -c ../confs/k3d/cluster_config.yaml
+	k3d cluster create -c ./confs/k3d/cluster_config.yaml
 	print_success "Cluster created successfully"
 
 	# ArgoCD installation
@@ -59,16 +59,16 @@ setup() {
 	kubectl create namespace argocd
 
 	print_info "Applying ArgoCD installation manifests..."
-	kubectl apply -n argocd -f ../confs/argocd/install.yaml
+	kubectl apply -n argocd -f ./confs/argocd/install.yaml
 
 	print_info "Applying ArgoCD configuration..."
-	kubectl apply -n argocd -f ../confs/argocd/argocd-cmd-params-cm.yaml
+	kubectl apply -n argocd -f ./confs/argocd/argocd-cmd-params-cm.yaml
 
 	print_info "Restarting ArgoCD server for changes to take effect..."
 	kubectl rollout restart deployment argocd-server -n argocd
 
 	print_info "Setting up ingress for ArgoCD..."
-	kubectl apply -f ../confs/argocd/ingress.yaml -n argocd
+	kubectl apply -f ./confs/argocd/ingress.yaml -n argocd
 
 	print_success "Installation complete!"
 	print_info "Waiting for ArgoCD to be ready..."
@@ -78,15 +78,15 @@ setup() {
 
 	print_info "ArgoCD should now be available at http://config.iot.ft:8081"
 
-	kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d | cat >./argocd/password.txt
-	print_success "Initial admin password saved to ./argocd/password.txt"
+	kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d | cat >./password.txt
+	print_success "Initial admin password saved to ./password.txt"
 }
 
 deploy() {
 	print_section "DEPLOYING APPLICATIONS"
 
 	print_info "checkin for submodules..."
-	if [ -z "$(ls -A './app')" ]; then
+	if [ -z "$(ls -A './confs/app')" ]; then
 		print_info "Submodule not initialize, initializing"
 
 		git submodule init
@@ -96,10 +96,10 @@ deploy() {
 	fi
 
 	print_info "Creating kubernetes secret"
-	kubectl apply -f app/ssh.yaml
+	kubectl apply -f ./confs/app/ssh.yaml
 
 	print_info "Sending application to ArgoCD"
-	kubectl apply -f app/application.yaml
+	kubectl apply -f ./confs/app/application.yaml
 
 	print_info "Waiting for namespace to be created by ArgoCD"
 	while ! kubectl get namespace application >/dev/null 2>&1; do
@@ -123,12 +123,12 @@ export MAIN_SCRIPT_RUNNING=true
 case $1 in
 uninstall)
 	print_section "STARTING UNINSTALLATION PROCESS"
-	bash -c ./uninstall.sh
+	bash -c ./scripts/uninstall.sh
 	exit 0
 	;;
 install)
 	print_section "STARTING INSTALLATION PROCESS"
-	if ! bash -c ./install.sh; then
+	if ! bash -c ./scripts/install.sh; then
 		print_error "Installation failed. Please check the logs."
 		exit 1
 	fi

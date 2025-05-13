@@ -3,7 +3,7 @@ set -e
 # Check if this script is being run from the main script
 if [ -z "$MAIN_SCRIPT_RUNNING" ]; then
   echo -e "\033[0;31m[ERROR]\033[0m This script should only be run through the main deployment script."
-  echo -e "\033[0;33m[INFO]\033[0m Please run: ./main_script.sh install"
+  echo -e "\033[0;33m[INFO]\033[0m Please run: ./scripts/setup.sh install"
   exit 1
 fi
 
