@@ -14,3 +14,11 @@ ports:
   - nodeFilters:
       - loadbalancer
     port: "8081:80"
+registries:
+  create:
+    name: 42Nexus
+  config: |
+    mirrors:
+      "*":
+        endpoint:
+          - https://nexus.42lyon.fr:5000
