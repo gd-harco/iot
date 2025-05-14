@@ -59,13 +59,19 @@ setup() {
 	kubectl create namespace argocd
 
 	print_info "Applying ArgoCD installation manifests..."
-	kubectl apply -n argocd -f ./confs/argocd/install.yaml
+	kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+	print_info "Waiting for ArgoCD to be ready..."
+	kubectl wait --for=condition=Available deploy/argocd-server --timeout=120s -n argocd
 
 	print_info "Applying ArgoCD configuration..."
 	kubectl apply -n argocd -f ./confs/argocd/argocd-cmd-params-cm.yaml
 
 	print_info "Restarting ArgoCD server for changes to take effect..."
 	kubectl rollout restart deployment argocd-server -n argocd
+
+	print_info "Waiting for ArgoCD to restart..."
+	kubectl wait --for=condition=Available deploy/argocd-server --timeout=120s -n argocd
 
 	print_info "Setting up ingress for ArgoCD..."
 	kubectl apply -f ./confs/argocd/ingress.yaml -n argocd
