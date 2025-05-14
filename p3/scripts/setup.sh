@@ -132,6 +132,7 @@ install)
 		print_error "Installation failed. Please check the logs."
 		exit 1
 	fi
+	exit 0
 	;&
 setup)
 	setup

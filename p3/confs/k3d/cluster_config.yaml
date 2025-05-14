@@ -4,6 +4,8 @@ apiVersion: k3d.io/v1alpha5
 kind: Simple
 metadata:
   name: iot-p3
+servers: 1 # same as `--servers 1`
+agents: 2 # same as `--agents 2`
 kubeAPI: # same as `--api-port myhost.my.domain:6445` (where the name would resolve to 127.0.0.1)
   host: "localhost" # important for the `server` setting in the kubeconfig
   hostIP: "127.0.0.1" # where the Kubernetes API will be listening on
