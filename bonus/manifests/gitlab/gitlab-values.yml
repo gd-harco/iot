@@ -1,0 +1,11 @@
+global:
+  hosts:
+    domain: gitlab.local
+    external-ip: 0.0.0.0
+    https: false
+  ingress:
+    configureCertmanager: false
+  edition: "ce"
+prometheus:
+  install: false
+
