@@ -1,0 +1,26 @@
+# Global GitLab configuration
+global:
+  hosts:
+    domain: iot.ft
+    https: false
+    externalIP: 10.0.2.15  # Replace with your actual IP
+  edition:
+    ce
+
+  ingress:
+    enabled: false
+    configureCertmanager: false
+
+  initialRootPassword:
+    secret: gitlab-initial-root-password
+    key: password
+
+nginx-ingress:
+  enabled: false
+
+gitlab:
+  webservice:
+    ingress:
+      enabled: false  # Disable default webservice ingress
+    service:
+      type: ClusterIP  # Make service available within cluster only

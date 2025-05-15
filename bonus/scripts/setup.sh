@@ -82,6 +82,43 @@ setup() {
 	print_success "Initial admin password saved to ./password.txt"
 }
 
+
+gitlab() {
+	print_section "DEPLOYING GITLAB"
+
+	print_info "Installing gitlab using helm and custom config files"
+
+	helm install gitlab gitlab/gitlab \
+		-f confs/gitlab/gitlab.yaml \
+		--namespace gitlab \
+		--create-namespace
+
+	print_info "Waiting for gitlab server to be available"
+	kubectl wait --for=condition=Available deployment.apps/gitlab-webservice-default -n gitlab --timeout=240s
+
+	print_info "applying gitlab ingress"
+	kubectl apply -f ./confs/gitlab/ingress.yaml
+
+	print_info "retreiving default root password"
+	kubectl get secret gitlab-initial-root-password -n gitlab -ojsonpath='{.data.password}' | base64 --decode | cat >gitlabPassword.txt
+
+	update_host "gitlab"
+
+	print_success "gitlab interface should be available at http://gitlab.iot.ft"
+
+	print_info "Generating gitlab token"
+	kubectl exec -n gitlab -it -c toolbox "$(kubectl get pods -n gitlab | grep toolbox | cut -d ' ' -f1)" -- gitlab-rails runner "$(cat ./scripts/generateToken.rb)" | tr -d '\r' >glpatPassword.txt
+
+	# print_info "creating repo on gitlab"
+	# curl \
+	# 	--verbose --header "PRIVATE-TOKEN: $(cat ./glpatPassword.txt)" \
+	# 	--header "Content-Type: application/json" \
+	# 	--data '{"name": "new_project", "visibility": "public"}' \
+	# 	--url "http://gitlab.iot.ft/api/v4/projects/" > repoInfo.txt
+
+
+}
+
 deploy() {
 	print_section "DEPLOYING APPLICATIONS"
 
@@ -132,10 +169,13 @@ install)
 		print_error "Installation failed. Please check the logs."
 		exit 1
 	fi
-	;&
+	;;
 setup)
 	setup
-	;&
+	;;
+gitlab)
+	gitlab
+	;;
 deploy)
 	deploy
 	exit 0

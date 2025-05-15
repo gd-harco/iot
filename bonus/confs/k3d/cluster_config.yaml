@@ -3,12 +3,25 @@
 apiVersion: k3d.io/v1alpha5
 kind: Simple
 metadata:
-  name: iot-p3
+  name: iot-bonus
+servers: 1
+agents: 2
 kubeAPI: # same as `--api-port myhost.my.domain:6445` (where the name would resolve to 127.0.0.1)
   host: "localhost" # important for the `server` setting in the kubeconfig
   hostIP: "127.0.0.1" # where the Kubernetes API will be listening on
   hostPort: "6550" # where the Kubernetes API listening port will be mapped to on your host system
 ports:
-  - nodeFilters:
+  - port: 80:80 # same as `--port '8080:80@loadbalancer'`
+    nodeFilters:
       - loadbalancer
-    port: "8081:80"
+  - port: 443:443
+    nodeFilters:
+      - loadbalancer
+registries:
+  create:
+    name: 42Nexus
+  config: |
+    mirrors:
+      "docker.io":
+        endpoint:
+          - https://nexus.42lyon.fr:5000
