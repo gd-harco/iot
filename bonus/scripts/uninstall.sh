@@ -11,6 +11,17 @@ fi
 
 print_section "UNINSTALL MODE INITIATED"
 
+#### HELM REMOVAL ####
+print_section "HELM REMOVAL"
+if ! command -v helm &>/dev/null; then
+  print_warn "helm not found - skipping removal"
+else
+  print_info "Removing helm..."
+  sudo rm "$(which helm)"
+
+  print_success "helm successfully removed"
+fi
+
 #### KUBECTL REMOVAL ####
 print_section "KUBECTL REMOVAL"
 if ! command -v kubectl &>/dev/null; then

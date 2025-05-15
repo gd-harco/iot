@@ -55,8 +55,28 @@ else
   print_success "kubectl installation complete"
 fi
 
-
-#### KUBECTL INSTALLATION ####
+#### HELM INSTALLATION ####
 print_section "HELM SETUP"
+if command -v helm &>/dev/null; then
+  print_info "helm already installed, skipping..."
+else
+  curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+fi
 
 print_success "All components installed successfully"
+
+curl \
+  --header "PRIVATE-TOKEN: $(cat ./gitlabPassword.txt)" \
+  --header 'Content-Type: application/json' \
+  --data '{ "name": "app"}' \
+  -X POST \
+  http://gitlab.iot.ft/api/v4/projects
+
+
+curl --request POST \
+--header "PRIVATE-TOKEN: $(cat ./gitlabPassword.txt)" \
+--header "Content-Type: application/json" \
+--data '{
+        "name": "new_project", "description": "New Project", "path": "new_project",
+        "namespace_id": "42", "initialize_with_readme": "true"}' \
+--url "http://gitlab.iot.ft/api/v4/projects/"
