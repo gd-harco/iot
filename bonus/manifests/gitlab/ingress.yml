@@ -6,7 +6,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.tls: "false"
 spec:
   rules:
-  - host: gitlab.local 
+  - host: gitlab.iot.local 
     http:
       paths:
       - path: /

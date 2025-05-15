@@ -1,6 +1,6 @@
 global:
   hosts:
-    domain: gitlab.local
+    domain: iot.local
     external-ip: 0.0.0.0
     https: false
   ingress:
@@ -8,4 +8,11 @@ global:
   edition: "ce"
 prometheus:
   install: false
+runner:
+  enabled: false
+ingress:
+  enabled: false
 
+gitlab-runner:
+  rbac:
+    create: false
