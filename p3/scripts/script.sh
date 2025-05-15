@@ -32,7 +32,7 @@ function install_argocd() {
 	kubectl create ns argocd
 	kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 	kubectl patch configmap argocd-cmd-params-cm -n argocd --type merge --patch '{"data": {"server.insecure": "true"}}'
-	#kubectl apply -f ../manifests/argocd-cmd-params-cm.yaml
+	#kubectl apply -f ../confs/argocd-cmd-params-cm.yaml
 	kubectl rollout restart deployment argocd-server -n argocd
 	kubectl wait --for=condition=Available deploy/argocd-server -n argocd --timeout=60s
 }
