@@ -4,8 +4,6 @@ apiVersion: k3d.io/v1alpha5
 kind: Simple
 metadata:
   name: iot-bonus
-servers: 1
-agents: 2
 kubeAPI: # same as `--api-port myhost.my.domain:6445` (where the name would resolve to 127.0.0.1)
   host: "localhost" # important for the `server` setting in the kubeconfig
   hostIP: "127.0.0.1" # where the Kubernetes API will be listening on
@@ -17,6 +15,10 @@ ports:
   - port: 443:443
     nodeFilters:
       - loadbalancer
+hostAliases: # /etc/hosts style entries to be injected into /etc/hosts in the node containers and in the NodeHosts section in CoreDNS
+  - ip: 10.0.2.15
+    hostnames:
+      - gitlab.iot.ft
 registries:
   create:
     name: 42Nexus

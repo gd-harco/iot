@@ -64,19 +64,3 @@ else
 fi
 
 print_success "All components installed successfully"
-
-curl \
-  --header "PRIVATE-TOKEN: $(cat ./gitlabPassword.txt)" \
-  --header 'Content-Type: application/json' \
-  --data '{ "name": "app"}' \
-  -X POST \
-  http://gitlab.iot.ft/api/v4/projects
-
-
-curl --request POST \
---header "PRIVATE-TOKEN: $(cat ./gitlabPassword.txt)" \
---header "Content-Type: application/json" \
---data '{
-        "name": "new_project", "description": "New Project", "path": "new_project",
-        "namespace_id": "42", "initialize_with_readme": "true"}' \
---url "http://gitlab.iot.ft/api/v4/projects/"

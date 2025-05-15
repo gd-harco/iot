@@ -33,6 +33,16 @@ print_section() {
 }
 export -f print_section
 
+
+install() {
+		print_section "STARTING INSTALLATION PROCESS"
+	if ! bash -c ./scripts/install.sh; then
+		print_error "Installation failed. Please check the logs."
+		exit 1
+	fi
+
+}
+
 update_host() {
 	print_info "Updating /etc/hosts file..."
 	if ! grep -q "127.0.0.1 $1.iot.ft" /etc/hosts; then
@@ -44,22 +54,24 @@ update_host() {
 	fi
 }
 
-setup() {
-	print_section "STARTING SETUP PROCESS"
+cluster() {
+	print_section "STARTING CLUSTER PROCESS"
 
 	# Cluster creation
 	print_section "CLUSTER SETUP"
 	print_info "Creating k3d cluster 'iotp3'..."
 	k3d cluster create -c ./confs/k3d/cluster_config.yaml
 	print_success "Cluster created successfully"
+}
 
+argocd() {
 	# ArgoCD installation
 	print_section "ARGOCD SETUP"
 	print_info "Creating namespace 'argocd'..."
 	kubectl create namespace argocd
 
 	print_info "Applying ArgoCD installation manifests..."
-	kubectl apply -n argocd -f ./confs/argocd/install.yaml
+	kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 	print_info "Applying ArgoCD configuration..."
 	kubectl apply -n argocd -f ./confs/argocd/argocd-cmd-params-cm.yaml
@@ -72,16 +84,15 @@ setup() {
 
 	print_success "Installation complete!"
 	print_info "Waiting for ArgoCD to be ready..."
-	kubectl wait --for=condition=Available deploy/argocd-server --timeout=120s -n argocd
+	kubectl wait --for=condition=Available deploy/argocd-server --timeout=360s -n argocd
 
 	update_host "config"
 
-	print_info "ArgoCD should now be available at http://config.iot.ft:8081"
+	print_info "ArgoCD should now be available at http://config.iot.ft:80"
 
 	kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d | cat >./password.txt
 	print_success "Initial admin password saved to ./password.txt"
 }
-
 
 gitlab() {
 	print_section "DEPLOYING GITLAB"
@@ -94,7 +105,7 @@ gitlab() {
 		--create-namespace
 
 	print_info "Waiting for gitlab server to be available"
-	kubectl wait --for=condition=Available deployment.apps/gitlab-webservice-default -n gitlab --timeout=240s
+	kubectl wait --for=condition=Available deployment.apps/gitlab-webservice-default -n gitlab --timeout=360s
 
 	print_info "applying gitlab ingress"
 	kubectl apply -f ./confs/gitlab/ingress.yaml
@@ -109,31 +120,47 @@ gitlab() {
 	print_info "Generating gitlab token"
 	kubectl exec -n gitlab -it -c toolbox "$(kubectl get pods -n gitlab | grep toolbox | cut -d ' ' -f1)" -- gitlab-rails runner "$(cat ./scripts/generateToken.rb)" | tr -d '\r' >glpatPassword.txt
 
-	# print_info "creating repo on gitlab"
-	# curl \
-	# 	--verbose --header "PRIVATE-TOKEN: $(cat ./glpatPassword.txt)" \
-	# 	--header "Content-Type: application/json" \
-	# 	--data '{"name": "new_project", "visibility": "public"}' \
-	# 	--url "http://gitlab.iot.ft/api/v4/projects/" > repoInfo.txt
+	print_info "Installing gitlab cli"
+	wget https://gitlab.com/gitlab-org/cli/-/releases/v1.57.0/downloads/glab_1.57.0_linux_amd64.tar.gz
+	tar -xvzf ./glab_1.57.0_linux_amd64.tar.gz bin/glab
+	sudo mv ./bin/glab /usr/local/bin/
+	rm -r bin
+	rm ./glab_1.57.0_linux_amd64.tar.gz
 
+	print_info "configuring Gitlab cli"
+	TOKEN=$(cat ./glpatPassword.txt)
+	sed -i "s/token: .*/token: $TOKEN/" ./confs/gitlab/gitlab_config.yml
+	cp ./confs/gitlab/gitlab_config.yml "/home/$USER/.config/glab-cli/config.yml"
+
+	print_info "updating credential in ~/.git-credentials"
+	echo "http://root:$(cat ./gitlabPassword.txt)@gitlab.iot.ft" >~/.git-credentials
+
+	print_info "creating subrepo app and pushing it to gitlab"
+	pushd ./confs/app
+	git init
+	git config --local credential.helper store #Tell git to use the stored credential for this repo
+	git add . && git commit -m "initial commit"
+	glab repo create -P --remoteName gitlab
+	git push --set-upstream gitlab master
+	popd
 
 }
 
 deploy() {
 	print_section "DEPLOYING APPLICATIONS"
 
-	print_info "checkin for submodules..."
-	if [ -z "$(ls -A './confs/app')" ]; then
-		print_info "Submodule not initialize, initializing"
+	# print_info "checkin for submodules..."
+	# if [ -z "$(ls -A './confs/app')" ]; then
+	# 	print_info "Submodule not initialize, initializing"
 
-		git submodule init
-		git submodule update
-	else
-		print_warn "Submodule already initialized"
-	fi
+	# 	git submodule init
+	# 	git submodule update
+	# else
+	# 	print_warn "Submodule already initialized"
+	# fi
 
-	print_info "Creating kubernetes secret"
-	kubectl apply -f ./confs/app/ssh.yaml
+	# print_info "Creating kubernetes secret"
+	# kubectl apply -f ./confs/app/ssh.yaml
 
 	print_info "Sending application to ArgoCD"
 	kubectl apply -f ./confs/app/application.yaml
@@ -147,10 +174,10 @@ deploy() {
 	while ! kubectl get deployment app-deployment -n application >/dev/null 2>&1; do
 		sleep 1
 	done
-	kubectl wait --for=condition=Available deployment/app-deployment -n application
+	kubectl wait --for=condition=Available deployment/app-deployment -n application --timeout=360s
 
 	update_host "app"
-	print_success "App deployed successfuly, available at http://app.iot.ft:8081"
+	print_success "App deployed successfuly, available at http://app.iot.ft"
 
 }
 
@@ -164,14 +191,20 @@ uninstall)
 	exit 0
 	;;
 install)
-	print_section "STARTING INSTALLATION PROCESS"
-	if ! bash -c ./scripts/install.sh; then
-		print_error "Installation failed. Please check the logs."
-		exit 1
-	fi
+	install
 	;;
-setup)
-	setup
+all)
+	install
+	cluster
+	gitlab
+	argocd
+	deploy
+	;;
+cluster)
+	cluster
+	;;
+argo)
+	argocd
 	;;
 gitlab)
 	gitlab

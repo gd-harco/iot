@@ -21,5 +21,5 @@ hosts:
   gitlab.iot.ft:
     api_protocol: http
     api_host: gitlab.iot.ft
-    token: glpat-wkRKrusJKUKUsBsPibwe
+    token: glpat-isT7wSMXfZm7SnF7Ca6g
     skip_tls_verify: "true"

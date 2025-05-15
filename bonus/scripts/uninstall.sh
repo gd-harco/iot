@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+
 # Check if this script is being run from the main script
 if [ -z "$MAIN_SCRIPT_RUNNING" ]; then
   echo -e "\033[0;31m[ERROR]\033[0m This script should only be run through the main deployment script."
@@ -83,5 +83,18 @@ print_success "Hosts file cleaned up"
 
 print_info "removing old password file"
 rm ./password.txt
+rm ./gitlabPassword.txt
+rm ./glpatPassword.txt
+
+print_info "deleting subrepo app"
+rm -rf ./confs/app/.git
+
+print_info "deleting gitlab cli related tool"
+if ! command -v glab &>/dev/null; then
+  print_warn "glab not found - skipping removal"
+else
+  sudo rm "$(which glab)"
+fi
+rm ~/.git-credentials
 
 print_success "Uninstallation process completed successfully"
