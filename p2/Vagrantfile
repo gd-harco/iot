@@ -1,43 +1,48 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+=begin
+
+=end
+
+
+SERVICES = {
+  'marobertS' => {
+
+    ip: '192.168.56.110',
+    # ports: { 6379 => 6379 }
+  }
+}
+
 Vagrant.configure("2") do |config|
+
   config.vm.box = "debian/bookworm64"
 
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-  # NOTE: This will enable public access to the opened port
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
-
-  # Create a public network, which generally matched to bridged network.
-  # Bridged networks make the machine appear as another physical device on
-  # your network.
-  # config.vm.network "public_network"
-
-  config.vm.provider "virtualbox" do |vb|
-    vb.gui = false
-    vb.cpus = 2
-
-    vb.memory = 4096 
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 2048
+    v.cpus = 4
   end
+
+# Common provisionning
+
+  config.vm.provision "shell", name: "apt-basics", inline: <<-SCRIPT
+    sudo apt-get update
+    sudo apt-get install curl -y
+    SCRIPT
 
   config.vm.define "marobertS" do |server|
     server.vm.hostname = "marobertS"
-    server.vm.network "private_network", ip: "192.168.56.110"
-
-    server.vm.provision "install-k3s-server", type: "shell", inline: <<-SHELL
-      export INSTALL_K3S_EXEC="server --write-kubeconfig-mode=644"
-      wget -qO- https://get.k3s.io | sh -
-      if [ $? -ne 0 ]; then
-        echo "Failed to install k3s server $?"
-        exit 1;
-      fi
-    SHELL
-
-    server.vm.provision "k3s-apply-manifests", type: "shell", after: "install-k3s-server", privileged: false, inline: <<-SHELL 
-      cd /vagrant
-      kubectl apply -f namespace.yml
-      kubectl apply -f app1.yml
-      kubectl apply -f app2.yml
-      kubectl apply -f app3.yml
-      kubectl apply -f ingress.yml
-    SHELL
-
+    server.vm.network "private_network", ip: SERVICES['marobertS'][:ip]
+    server.vm.provider "virtualbox" do |v|
+      v.name = "marobertS"
+    end
+    server.vm.provision "shell", name: "install-k3s-Server", path:"./scripts/ServerProvision.sh", args: [SERVICES['marobertS'][:ip]]
+    server.vm.provision "shell", name: "ease-access", path:"./scripts/access.sh"
+    server.vm.provision "shell", name: "launch", inline: <<-EOF
+      cd /vagrant/confs/
+      sudo kubectl apply -f .
+      EOF
   end
 end
+
+# https://www.youtube.com/watch?v=JLnjMCRLcCo
