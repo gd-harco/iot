@@ -35,8 +35,7 @@ function install_argocd() {
 install_docker
 install_kubectl
 install_k3d
+install_k3d_cli
 install_argocd
 
 echo "127.0.0.1	awesome.local" | sudo tee -a /etc/hosts
-
-}
