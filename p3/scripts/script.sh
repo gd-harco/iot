@@ -39,3 +39,4 @@ install_argocd
 install_argocd_cli
 
 echo "127.0.0.1	awesome.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1	argocd.awesome.local" | sudo tee -a /etc/hosts
