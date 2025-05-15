@@ -32,7 +32,7 @@ function install_argocd() {
 	kubectl apply -f ../confs/ingress.yml
 }
 
-# install_docker
+install_docker
 install_kubectl
 install_k3d
 install_argocd
