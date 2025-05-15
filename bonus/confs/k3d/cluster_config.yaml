@@ -1,0 +1,29 @@
+---
+# k3d configuration file, saved as e.g. /home/me/myk3dcluster.yaml
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: iot-bonus
+kubeAPI: # same as `--api-port myhost.my.domain:6445` (where the name would resolve to 127.0.0.1)
+  host: "localhost" # important for the `server` setting in the kubeconfig
+  hostIP: "127.0.0.1" # where the Kubernetes API will be listening on
+  hostPort: "6550" # where the Kubernetes API listening port will be mapped to on your host system
+ports:
+  - port: 80:80 # same as `--port '8080:80@loadbalancer'`
+    nodeFilters:
+      - loadbalancer
+  - port: 443:443
+    nodeFilters:
+      - loadbalancer
+hostAliases: # /etc/hosts style entries to be injected into /etc/hosts in the node containers and in the NodeHosts section in CoreDNS
+  - ip: 10.0.2.15
+    hostnames:
+      - gitlab.iot.ft
+registries:
+  create:
+    name: 42Nexus
+  config: |
+    mirrors:
+      "docker.io":
+        endpoint:
+          - https://nexus.42lyon.fr:5000

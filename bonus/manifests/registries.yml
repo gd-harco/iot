@@ -1,4 +1,0 @@
-mirrors:
-  "*":
-    endpoint:
-      - https://nexus.42lyon.fr:5000
