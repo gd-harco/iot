@@ -16,6 +16,13 @@ function install_kubectl() {
 	echo "alias k=kubectl" >>$HOME/.bash_rc && source $HOME/.bash_rc
 }
 
+function install_argocd_cli() {
+  export ARGOCD_VERSION=$(curl --silent "https://api.github.com/repos/argoproj/argo-cd/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+  curl -sSL -o /tmp/argocd-${ARGOCD_VERSION} https://github.com/argoproj/argo-cd/releases/download/${ARGOCD_VERSION}/argocd-linux-amd64
+  chmod +x /tmp/argocd-${VERSION}
+  sudo mv /tmp/argocd-${VERSION} /usr/local/bin/argocd
+}
+
 function install_argocd() {
 	kubectl create ns argocd
 	kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
@@ -26,9 +33,11 @@ function install_argocd() {
 	kubectl apply -f ../confs/ingress.yml
 }
 
-# install_docker
+install_docker
 install_kubectl
 install_k3d
 install_argocd
 
 echo "127.0.0.1	awesome.local" | sudo tee -a /etc/hosts
+
+}
