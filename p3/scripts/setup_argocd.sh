@@ -11,7 +11,9 @@ function setup_argocd() {
 		--path . \
 		--dest-namespace dev \
 		--dest-server https://kubernetes.default.svc \
-		--directory-recurse
+		--directory-recurse \
+		--sync-policy automated
+
 }
 
 setup_argocd
