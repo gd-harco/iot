@@ -1,3 +1,4 @@
 .vagrant/
 *assword.txt
 node-token
+kubectl

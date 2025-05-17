@@ -32,7 +32,12 @@ function install_argocd() {
 	kubectl apply -f ../confs/ingress.yml
 }
 
-install_docker
+if command -v docker &>/dev/null; then
+  echo "docker already installed, skipping..."
+else
+	install_docker
+fi
+
 install_kubectl
 install_k3d
 install_argocd
