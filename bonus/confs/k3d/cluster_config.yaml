@@ -20,8 +20,8 @@ hostAliases: # /etc/hosts style entries to be injected into /etc/hosts in the no
     hostnames:
       - gitlab.iot.ft
 registries:
-  create:
-    name: 42Nexus
+  # create:
+  # name: 42Nexus
   config: |
     mirrors:
       "docker.io":

@@ -35,7 +35,7 @@ export -f print_section
 
 
 install() {
-		print_section "STARTING INSTALLATION PROCESS"
+	print_section "STARTING INSTALLATION PROCESS"
 	if ! bash -c ./scripts/install.sh; then
 		print_error "Installation failed. Please check the logs."
 		exit 1
@@ -61,6 +61,7 @@ cluster() {
 	print_section "CLUSTER SETUP"
 	print_info "Creating k3d cluster 'iotp3'..."
 	k3d cluster create -c ./confs/k3d/cluster_config.yaml
+	# k3d cluster create -c ./confs/k3d/cluster_config.yaml --registry-config "./confs/k3d/registries.yaml"
 	print_success "Cluster created successfully"
 }
 
@@ -137,11 +138,12 @@ gitlab() {
 
 	print_info "creating subrepo app and pushing it to gitlab"
 	pushd ./confs/app
+	git config init.defaultBranch main
 	git init
 	git config --local credential.helper store #Tell git to use the stored credential for this repo
 	git add . && git commit -m "initial commit"
 	glab repo create -P --remoteName gitlab
-	git push --set-upstream gitlab master
+	git push --set-upstream gitlab main
 	popd
 
 }
