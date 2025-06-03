@@ -2,6 +2,7 @@
 
 function setup_argocd() {
 	ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+	echo "$ARGOCD_PASSWORD" >"pass"
 	argocd login --username admin --password "$ARGOCD_PASSWORD" --insecure --plaintext --grpc-web argocd.awesome.local:8080
 
 	kubectl create ns dev
