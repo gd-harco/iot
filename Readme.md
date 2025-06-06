@@ -119,7 +119,9 @@ Inside the bonus folder, input
 ./scripts/setup.sh all
 ```
 
-you can also use one of the folliwing arguments to setup only one part:
+It will install all dependencies, setup the k3d cluster, the gitlab instance, the argocd instance and deploy the application using argocd.
+
+You can also use one of the following arguments to setup only one part:
 
 - `install` to install all dependencies (docker, k3d, helm, kubectl, argocd)
 - `cluster` to setup the k3d cluster
