@@ -1,153 +1,98 @@
-# Inception-of-Things (IoT) - DevOps Project
+# Inception of Things — DevOps & Infrastructure as Code
 
-## Description
+Projet réalisé en binôme dans le cadre du cursus de l'école 42. Il met en pratique le provisionnement d'infrastructures locales, l'administration de clusters Kubernetes et le déploiement d'applications selon une approche GitOps.
 
-This project is a part of a System Administration exercise focusing on the use of K3s and K3d with Vagrant. It also touches on deploying applications using Argo CD and integrating with GitLab (in the bonus part). The exercises are designed to help you understand the basics of Kubernetes, continuous integration, and deployment in a virtualized environment.
+## Ce que ce projet démontre
 
-This project was made in duo with [Marobert](https://github.com/MariusROBERT). We both made the whole project, and the main branch contain his p1 and p3, with my p2 and bonus part.
-Both of our whole project is available on our branches, so you can see the whole project with both of our parts.
+- **Infrastructure as Code** : définition de machines virtuelles avec Vagrant et configuration reproductible de clusters K3s.
+- **Conteneurisation et orchestration** : déploiement de workloads Kubernetes, services et règles d'ingress.
+- **Automatisation** : scripts de provisionnement et de configuration pour réduire les étapes manuelles.
+- **GitOps / Continuous Delivery** : Argo CD synchronise des manifestes depuis un dépôt Git vers un cluster K3d.
+- **Intégration d'outils DevOps** : déploiement local de GitLab avec Helm et connexion à Argo CD.
+- **Diagnostic d'environnements** : exposition de services et résolution de noms locaux pour tester les applications depuis le poste de travail.
 
-## Table of Contents
+## Parcours du projet
 
-- [Exercise 1: K3s and Vagrant](#exercise-1-k3s-and-vagrant)
-- [Exercise 2: K3s and Three Simple Applications](#exercise-2-k3s-and-three-simple-applications)
-- [Exercise 3: K3d and Argo CD](#exercise-3-k3d-and-argo-cd)
-- [Bonus: GitLab Integration](#bonus-gitlab-integration)
-- [Technologies Used](#technologies-used)
-- [Contributing](#contributing)
-- [License](#license)
+### P1 — Cluster K3s avec Vagrant
 
-## Exercise 1: K3s and Vagrant
+Le `Vagrantfile` provisionne deux machines Debian : un nœud serveur K3s et un nœud agent. Le serveur fournit le jeton nécessaire à l'enregistrement du nœud worker.
 
-### Description
+**Compétences mises en œuvre :** machines virtuelles, adressage réseau privé, provisionnement automatisé et architecture Kubernetes serveur/agent.
 
-This exercise involves setting up two virtual machines using Vagrant and installing K3s on them. One machine will act as the server (controller) and the other as the worker (agent).
+```bash
+cd p1
+vagrant up
+```
 
-### Prerequisites
+### P2 — Applications et routage HTTP
 
-- Vagrant
-- VirtualBox or any other Vagrant provider
+Une machine virtuelle héberge K3s et trois applications. Les manifestes Kubernetes déclarent leurs Deployments et Services ; un Ingress distribue le trafic selon le nom d'hôte (`app1.com`, `app2.com`, `app3.com`).
 
-### Steps
+**Compétences mises en œuvre :** ressources Kubernetes, exposition de services, règles d'ingress et configuration de ressources de conteneurs.
 
-1. Create a Vagrantfile to define the two virtual machines.
-2. Configure the machines with the specified IP addresses and hostnames.
-3. Install K3s on both machines, one as a server and the other as an agent.
-4. Ensure you can connect to both machines via SSH without a password.
+```bash
+cd p2
+bash scripts/setup_P2.sh
+```
 
-### Files
+Le script démarre la machine virtuelle et ajoute les noms d'hôte à `/etc/hosts` (l'édition de ce fichier demande les droits administrateur).
 
-- `p1/Vagrantfile`: Vagrant configuration file.
-- `p1/scripts/`: Scripts for setting up the machines.
+### P3 — K3d et déploiement GitOps avec Argo CD
 
-## Exercise 2: K3s and Three Simple Applications
+Cette partie automatise l'installation de Docker, K3d, `kubectl` et Argo CD, puis configure une application Argo CD qui suit les manifestes d'un dépôt Git. Les changements publiés dans le dépôt peuvent ainsi être réconciliés dans le cluster.
 
-### Description
+**Compétences mises en œuvre :** cluster Kubernetes local dans Docker, configuration d'Argo CD, gestion de manifestes et déploiement continu piloté par Git.
 
-This exercices aimes to deploy three web applications on a single virtual machine using K3s. The applications should be accessible based on the HOST used in the request.
+Les scripts d'installation et de configuration se trouvent dans `p3/scripts/` ; les configurations associées sont dans `p3/confs/`.
 
-### Prerequisites
+### Bonus — GitLab, Helm et chaîne GitOps locale
 
-- K3s installed on a virtual machine
+Le bonus étend le cluster K3d avec une instance GitLab déployée par Helm. Le script d'orchestration installe les outils, crée le cluster, configure GitLab et Argo CD, puis déploie une application depuis le dépôt GitLab.
 
-### Steps
+**Compétences mises en œuvre :** Helm, intégration entre forge Git et Argo CD, configuration d'ingress et automatisation d'un environnement DevOps local.
 
-1. Set up a virtual machine with K3s in server mode.
-2. Deploy three web applications.
-3. Configure the applications to be accessible based on the HOST used in the request.
-
-### Files
-
-- `p2/Vagrantfile`: Vagrant configuration file.
-- `p2/scripts/`: Scripts for deploying the applications.
-- `p2/confs/`: Configuration files for the applications.
-
-## Exercise 3: K3d and Argo CD
-
-### Description
-
-This exercise involves setting up K3d and using Argo CD for continuous integration. We had to push an application image to a [Docker registry](https://hub.docker.com/r/marobert42/inception-of-things), deploy it using Argo CD, and verify the deployment by updating the application version in the GitHub repository.
-
-The whole process, including dependency installation, had to be automated using scripts.
-
-### Prerequisites
-
-- K3d
-- Docker
-- Argo CD
-
-### Steps
-
-1. Install K3d on your virtual machine.
-2. Set up Argo CD and create the necessary namespaces.
-3. Configure Argo CD to deploy an application from your GitHub repository.
-4. Update the application version in your GitHub repository and verify the deployment.
-
-### Files
-
-- `p3/scripts/`: Scripts for setting up K3d and Argo CD.
-- `p3/confs/`: Configuration files for Argo CD and the application.
-
-## Bonus: GitLab Integration
-
-### Description
-
-This bonus exercise involves integrating GitLab into the setup created in Exercise 3. We had to set up a local GitLab instance and configure it to work with our Kubernetes cluster.
-
-### Prerequisites
-
-- GitLab
-- Helm (optional)
-
-### Steps
-
-1. Set up the k3d cluster like in part 3.
-2. Create a dedicated namespace for GitLab.
-3. Install GitLab using the Helm charts.
-4. Ensure everything from Exercise 3 works with your local GitLab.
-
-### Files
-
-- `bonus/scripts/`: Scripts for setting up GitLab.
-- `bonus/confs/`: Configuration files for GitLab.
-
-## Usage
-
-Inside the bonus folder, input
+Depuis le répertoire `bonus/` :
 
 ```bash
 ./scripts/setup.sh all
 ```
 
-It will install all dependencies, setup the k3d cluster, the gitlab instance, the argocd instance and deploy the application using argocd.
+Les commandes disponibles sont `install`, `cluster`, `gitlab`, `argo`, `deploy` et `uninstall`. Elles exécutent les étapes individuellement ; `all` enchaîne l'installation, la création du cluster, la configuration de GitLab et Argo CD et le déploiement. Le script nécessite les droits adéquats pour installer des outils système et modifier `/etc/hosts`.
 
-You can also use one of the following arguments to setup only one part:
+## Technologies
 
-- `install` to install all dependencies (docker, k3d, helm, kubectl, argocd)
-- `cluster` to setup the k3d cluster
-- `gitlab` to setup the gitlab instance and push the application configuration to it
-- `argocd` to setup the argocd instance
-- `deploy` to deploy the application using argocd
+| Domaine | Outils |
+| --- | --- |
+| Infrastructure locale | Vagrant, VirtualBox |
+| Conteneurs et clusters | Docker, Kubernetes, K3s, K3d |
+| Déploiement | Argo CD, Helm |
+| Forge et configuration | GitLab, YAML, Bash |
 
-## Technologies Used
+## Structure du dépôt
 
-- Vagrant
-- K3s
-- K3d
-- Docker
-- Kubernetes
-- Argo CD
-- GitLab (Bonus)
+```text
+.
+├── p1/       # Vagrant et cluster K3s serveur/agent
+├── p2/       # K3s, applications, Services et Ingress
+├── p3/       # K3d et configuration Argo CD
+└── bonus/    # GitLab, Helm, Argo CD et déploiement applicatif
+```
 
-## Contributing
+## Prérequis
 
-Contributions are welcome! Please follow these steps:
+- Linux avec accès Internet et droits `sudo`
+- VirtualBox et Vagrant pour P1 et P2
+- Docker pour les parties reposant sur K3d (P3 et bonus)
+- Ressources suffisantes pour exécuter les machines virtuelles ou les composants du bonus ; GitLab est particulièrement gourmand
 
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Commit your changes and push to your fork.
-4. Submit a pull request.
+Les scripts installent certains outils en les téléchargeant depuis leurs sources amont. Consultez-les avant exécution et vérifiez les ressources disponibles sur votre machine, notamment avant de lancer l'ensemble du bonus.
 
-## License
+## Répartition du travail
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+Projet réalisé en binôme avec [Marobert](https://github.com/MariusROBERT). Sur cette branche, P1 et P3 sont principalement portés par mon binôme, et P2 ainsi que le bonus par moi. Les branches du dépôt présentent les versions complètes réalisées par chacun.
+
+## À retenir pour un portfolio
+
+Ce projet illustre une progression de l'infrastructure virtualisée vers le déploiement d'applications conteneurisées et leur synchronisation depuis Git. Il permet de discuter de choix d'architecture, de manifestes Kubernetes, d'automatisation shell et d'intégration d'outils DevOps lors d'un entretien.
+
+> Projet pédagogique : les déploiements sont destinés à un environnement local de développement et de démonstration, pas à une mise en production.
