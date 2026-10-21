@@ -91,8 +91,4 @@ Les scripts installent certains outils en les téléchargeant depuis leurs sourc
 
 Projet réalisé en binôme avec [Marobert](https://github.com/MariusROBERT). Sur cette branche, P1 et P3 sont principalement portés par mon binôme, et P2 ainsi que le bonus par moi. Les branches du dépôt présentent les versions complètes réalisées par chacun.
 
-## À retenir pour un portfolio
-
-Ce projet illustre une progression de l'infrastructure virtualisée vers le déploiement d'applications conteneurisées et leur synchronisation depuis Git. Il permet de discuter de choix d'architecture, de manifestes Kubernetes, d'automatisation shell et d'intégration d'outils DevOps lors d'un entretien.
-
 > Projet pédagogique : les déploiements sont destinés à un environnement local de développement et de démonstration, pas à une mise en production.
